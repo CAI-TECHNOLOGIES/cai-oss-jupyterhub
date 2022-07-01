@@ -40,6 +40,8 @@ from sqlalchemy.types import Text
 from sqlalchemy.types import TypeDecorator
 from tornado.log import app_log
 
+import uuid
+
 from .roles import assign_default_roles
 from .roles import create_role
 from .roles import get_default_roles
@@ -237,6 +239,42 @@ class Group(Base):
         Returns None if not found.
         """
         return db.query(cls).filter(cls.name == name).first()
+
+class Schedule(Base):
+    """ Schedules """
+
+    def uuid_gen():
+        return str(uuid.uuid4())
+
+    __tablename__ = 'schedules'
+    id = Column(Unicode(255), primary_key=True, default=uuid_gen)
+    user_id = Column(Unicode(255))
+    command = Column(Unicode(255))
+    schedule = Column(Unicode(255))
+
+    def __repr__(self):
+        return "<%s %s %s %s>" % (
+            self.__class__.__name__,
+            self.id,
+            self.command,
+            self.schedule,
+        )
+
+    @classmethod
+    def find(cls, db, user_id):
+        """Find a schedule by name.
+        Returns None if not found.
+        """
+        return db.query(cls).filter(cls.user_id == user_id)
+
+    @classmethod
+    def find_all(cls, db):
+        """Find all schedules.
+        Returns None if not found.
+        """
+        return db.query(cls)
+
+
 
 
 class User(Base):
