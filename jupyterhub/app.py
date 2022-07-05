@@ -2615,7 +2615,7 @@ class JupyterHub(Application):
     def init_tornado_settings(self):
         """Set up the tornado settings dict."""
         base_url = self.hub.base_url
-        jinja_options = dict(autoescape=True, enable_async=True)
+        jinja_options = dict(enable_async=True)
         jinja_options.update(self.jinja_environment_options)
         base_path = self._template_paths_default()[0]
         if base_path not in self.template_paths:
@@ -2626,7 +2626,7 @@ class JupyterHub(Application):
                 FileSystemLoader(self.template_paths),
             ]
         )
-        jinja_env = Environment(loader=loader, **jinja_options)
+        jinja_env = Environment(loader=loader, autoescape=True, **jinja_options)
         # We need a sync jinja environment too, for the times we *must* use sync
         # code - particularly in RequestHandler.write_error. Since *that*
         # is called from inside the asyncio event loop, we can't actulaly just
@@ -2634,7 +2634,7 @@ class JupyterHub(Application):
         # own loop, which seems not worth the trouble. Instead, we create another
         # environment, exactly like this one, but sync
         del jinja_options['enable_async']
-        jinja_env_sync = Environment(loader=loader, **jinja_options)
+        jinja_env_sync = Environment(loader=loader, autoescape=True, **jinja_options)
 
         login_url = url_path_join(base_url, 'login')
         logout_url = self.authenticator.logout_url(base_url)

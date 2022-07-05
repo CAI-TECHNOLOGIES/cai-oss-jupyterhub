@@ -102,7 +102,8 @@ class LoginHandler(BaseHandler):
             ),
         }
         custom_html = Template(
-            self.authenticator.get_custom_html(self.hub.base_url)
+            self.authenticator.get_custom_html(self.hub.base_url),
+            autoescape=True,
         ).render(**context)
         return self.render_template(
             'login.html',
