@@ -59,37 +59,30 @@ module.exports = {
       });
       // add users to group
       app.post("/hub/api/groups/*/users", (req, res) => {
-        console.log(req.url, req.body);
         res.status(200).end();
       });
       // remove users from group
       app.delete("/hub/api/groups/*", (req, res) => {
-        console.log(req.url, req.body);
         res.status(200).end();
       });
       // add users
       app.post("/hub/api/users", (req, res) => {
-        console.log(req.url, req.body);
         res.status(200).end();
       });
       // delete user
       app.delete("/hub/api/users", (req, res) => {
-        console.log(req.url, req.body);
         res.status(200).end();
       });
       // start user server
       app.post("/hub/api/users/*/server", (req, res) => {
-        console.log(req.url, req.body);
         res.status(200).end();
       });
       // stop user server
       app.delete("/hub/api/users/*/server", (req, res) => {
-        console.log(req.url, req.body);
         res.status(200).end();
       });
       // shutdown hub
       app.post("/hub/api/shutdown", (req, res) => {
-        console.log(req.url, req.body);
         res.status(200).end();
       });
     },
