@@ -26,6 +26,7 @@ from sqlalchemy import or_
 from sqlalchemy import select
 from sqlalchemy import Table
 from sqlalchemy import Unicode
+from sqlalchemy import Float
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import backref
 from sqlalchemy.orm import interfaces
@@ -41,6 +42,7 @@ from sqlalchemy.types import TypeDecorator
 from tornado.log import app_log
 
 import uuid
+import time
 
 from .roles import assign_default_roles
 from .roles import create_role
@@ -248,6 +250,8 @@ class Schedule(Base):
 
     __tablename__ = 'schedules'
     id = Column(Unicode(255), primary_key=True, default=uuid_gen)
+    last_run_time = Column(Float, default=time.time)
+    next_execution_time = Column(Float)
     user_id = Column(Unicode(255))
     command = Column(Unicode(255))
     schedule = Column(Unicode(255))
@@ -349,6 +353,13 @@ class User(Base):
         Returns None if not found.
         """
         return db.query(cls).filter(cls.name == name).first()
+    
+    @classmethod
+    def find_by_id(cls, db, id):
+        """Find a user by id.
+        Returns None if not found.
+        """
+        return db.query(cls).filter(cls.id == id).first()
 
 
 class Spawner(Base):

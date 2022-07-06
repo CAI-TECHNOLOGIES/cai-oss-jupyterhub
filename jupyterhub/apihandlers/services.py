@@ -13,6 +13,7 @@ from ..utils import token_authenticated
 from ..scopes import needs_scope
 from ..scopes import Scope
 from .base import APIHandler
+from ..scheduler import get_next_execution_time
 
 
 class ServiceListAPIHandler(APIHandler):
@@ -49,7 +50,7 @@ class ScheduleAPIHandler(APIHandler):
         token = headers["Authorization"].split()[1]
         user_id = orm.APIToken.find(self.db, token).user.id
 
-        schedule_item = orm.Schedule(user_id=user_id, command=command, schedule=schedule)
+        schedule_item = orm.Schedule(user_id=user_id, command=command, schedule=schedule, next_execution_time=get_next_execution_time(schedule))
         self.db.add(schedule_item)
         self.db.commit()
         self.write(json.dumps({"status": "success"}))

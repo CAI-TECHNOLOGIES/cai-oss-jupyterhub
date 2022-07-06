@@ -13,6 +13,8 @@ import signal
 import socket
 import sys
 import time
+import threading
+
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from datetime import timedelta
@@ -26,6 +28,8 @@ from textwrap import dedent
 from urllib.parse import unquote
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
+
+from .scheduler import scheduler
 
 if sys.version_info[:2] < (3, 3):
     raise ValueError("Python < 3.3 not supported: %s" % sys.version)
@@ -2823,6 +2827,9 @@ class JupyterHub(Application):
         self.init_tornado_settings()
         self.init_handlers()
         self.init_tornado_application()
+        
+        self.log.info("Starting scheduler thread")
+        threading.Thread(target=scheduler, args=(self.tornado_settings, )).start()
 
         # init_spawners can take a while
         init_spawners_timeout = self.init_spawners_timeout
