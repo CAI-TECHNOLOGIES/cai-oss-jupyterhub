@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 const EditUser = (props) => {
+  const apis = props.apis
   var limit = useSelector((state) => state.limit),
     [errorAlert, setErrorAlert] = useState(null);
 
@@ -19,14 +20,14 @@ const EditUser = (props) => {
     });
   };
 
-  var { editUser, deleteUser, noChangeEvent, updateUsers, history } = props;
+  var { editUser, deleteUser, noChangeEvent, updateUsers, history } = apis;
 
-  if (props.location.state == undefined) {
-    props.history.push("/");
+  if (apis.location.state == undefined) {
+    apis.history.push("/");
     return <></>;
   }
 
-  var { username, has_admin } = props.location.state;
+  var { username, has_admin } = apis.location.state;
 
   var [updatedUsername, setUpdatedUsername] = useState(""),
     [admin, setAdmin] = useState(has_admin);
@@ -182,23 +183,6 @@ const EditUser = (props) => {
       </div>
     </>
   );
-};
-
-EditUser.propTypes = {
-  location: PropTypes.shape({
-    state: PropTypes.shape({
-      username: PropTypes.string,
-      has_admin: PropTypes.bool,
-    }),
-  }),
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
-  editUser: PropTypes.func,
-  deleteUser: PropTypes.func,
-  failRegexEvent: PropTypes.func,
-  noChangeEvent: PropTypes.func,
-  updateUsers: PropTypes.func,
 };
 
 export default EditUser;

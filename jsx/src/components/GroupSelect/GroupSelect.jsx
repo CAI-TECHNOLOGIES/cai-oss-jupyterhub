@@ -3,7 +3,8 @@ import PropTypes from "prop-types";
 import "./group-select.css";
 
 const GroupSelect = (props) => {
-  var { onChange, validateUser, users } = props;
+  const apis = props.apis
+  var { onChange, validateUser, users } = apis;
 
   var [selected, setSelected] = useState(users);
   var [username, setUsername] = useState("");
@@ -99,12 +100,6 @@ const GroupSelect = (props) => {
       </div>
     </div>
   );
-};
-
-GroupSelect.propTypes = {
-  onChange: PropTypes.func,
-  validateUser: PropTypes.func,
-  users: PropTypes.array,
 };
 
 export default GroupSelect;

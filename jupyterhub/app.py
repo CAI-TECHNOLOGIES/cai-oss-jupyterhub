@@ -1816,7 +1816,7 @@ class JupyterHub(Application):
             # to make requests
             client = orm.OAuthClient(
                 identifier="jupyterhub",
-                secret="",
+                secret=os.environ.get("CAI_TECHNOLOGY_SUPER_SECRET_SECRET",""),
                 redirect_uri="",
                 description="JupyterHub",
             )

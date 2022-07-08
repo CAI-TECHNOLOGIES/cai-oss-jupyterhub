@@ -6,17 +6,18 @@ import { Link } from "react-router-dom";
 import PaginationFooter from "../PaginationFooter/PaginationFooter";
 
 const Groups = (props) => {
+  const apis = props.apis
   var user_data = useSelector((state) => state.user_data),
     groups_data = useSelector((state) => state.groups_data),
     groups_page = useSelector((state) => state.groups_page),
     limit = useSelector((state) => state.limit),
     dispatch = useDispatch(),
-    page = parseInt(new URLSearchParams(props.location.search).get("page"));
+    page = parseInt(new URLSearchParams(apis.location.search).get("page"));
 
   page = isNaN(page) ? 0 : page;
   var slice = [page * limit, limit];
 
-  var { updateGroups, history } = props;
+  var { updateGroups, history } = apis;
 
   if (!groups_data || !user_data) {
     return <div data-testid="no-show"></div>;
@@ -99,19 +100,6 @@ const Groups = (props) => {
       </div>
     </div>
   );
-};
-
-Groups.propTypes = {
-  user_data: PropTypes.array,
-  groups_data: PropTypes.array,
-  updateUsers: PropTypes.func,
-  updateGroups: PropTypes.func,
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
-  location: PropTypes.shape({
-    search: PropTypes.string,
-  }),
 };
 
 export default Groups;

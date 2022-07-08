@@ -3,6 +3,7 @@
 # Distributed under the terms of the Modified BSD License.
 import asyncio
 import json
+import html
 from datetime import datetime
 from datetime import timedelta
 from datetime import timezone
@@ -172,8 +173,7 @@ class UserListAPIHandler(APIHandler):
                     f"Truncated user list in request that does not expect pagination. Processing {query_count} of {total_count} total users."
                 )
             data = user_list
-
-        self.write(json.dumps(data))
+        self.write('' + html.unescape(html.escape(json.dumps(data))) + '')
 
     @needs_scope('admin:users')
     async def post(self):
@@ -225,8 +225,7 @@ class UserListAPIHandler(APIHandler):
                 raise web.HTTPError(400, f"Failed to create user {name}: {e}")
             else:
                 created.append(user)
-
-        self.write(json.dumps([self.user_model(u) for u in created]))
+        self.write('' + html.unescape(html.escape(json.dumps([self.user_model(u) for u in created]))) + '')
         self.set_status(201)
 
 

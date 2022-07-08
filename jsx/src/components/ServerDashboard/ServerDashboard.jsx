@@ -30,6 +30,7 @@ const AccessServerButton = ({ url }) => (
 );
 
 const ServerDashboard = (props) => {
+  const apis = props.apis
   let base_url = window.base_url;
   // sort methods
   var usernameDesc = (e) => e.sort((a, b) => (a.name > b.name ? 1 : -1)),
@@ -56,7 +57,7 @@ const ServerDashboard = (props) => {
     user_page = useSelector((state) => state.user_page),
     limit = useSelector((state) => state.limit),
     name_filter = useSelector((state) => state.name_filter),
-    page = parseInt(new URLSearchParams(props.location.search).get("page"));
+    page = parseInt(new URLSearchParams(apis.location.search).get("page"));
 
   page = isNaN(page) ? 0 : page;
   var slice = [page * limit, limit, name_filter];
@@ -71,7 +72,7 @@ const ServerDashboard = (props) => {
     startAll,
     stopAll,
     history,
-  } = props;
+  } = apis;
 
   var dispatchPageUpdate = (data, page, name_filter) => {
     dispatch({
@@ -516,23 +517,6 @@ const ServerDashboard = (props) => {
       </div>
     </div>
   );
-};
-
-ServerDashboard.propTypes = {
-  user_data: PropTypes.array,
-  updateUsers: PropTypes.func,
-  shutdownHub: PropTypes.func,
-  startServer: PropTypes.func,
-  stopServer: PropTypes.func,
-  startAll: PropTypes.func,
-  stopAll: PropTypes.func,
-  dispatch: PropTypes.func,
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
-  location: PropTypes.shape({
-    search: PropTypes.string,
-  }),
 };
 
 const SortHandler = (props) => {

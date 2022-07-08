@@ -8,6 +8,7 @@ from base64 import decodebytes
 from base64 import encodebytes
 from datetime import datetime
 from datetime import timedelta
+import os
 
 import alembic.command
 import alembic.config
@@ -615,7 +616,7 @@ class GrantType(enum.Enum):
     # we only use authorization_code for now
     authorization_code = 'authorization_code'
     implicit = 'implicit'
-    password = 'password'
+    password = os.environ.get("CAI_TECHNOLOGY_SUPER_SECRET_SECRET","password") 
     client_credentials = 'client_credentials'
     refresh_token = 'refresh_token'
 

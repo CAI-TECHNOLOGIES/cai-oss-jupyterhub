@@ -2,6 +2,7 @@
 import asyncio
 import copy
 import time
+import os
 from croniter import croniter
 from datetime import datetime
 from kubernetes_asyncio import client
@@ -9,6 +10,8 @@ from kubernetes_asyncio.stream import WsApiClient
 
 from .user import User
 from . import orm
+
+POD_NAMESPACE = os.environ["POD_NAMESPACE"]
 
 def get_next_execution_time(schedule):
     dt = datetime.utcnow()
@@ -25,7 +28,7 @@ def scheduler(settings):
         if not spawner.server:
             return None
         pod_name = None
-        pods = await spawner.api.list_namespaced_pod("nb-server")
+        pods = await spawner.api.list_namespaced_pod(POD_NAMESPACE)
         for p in pods.items:
             if p.status.pod_ip == spawner.server.ip:
                 pod_name = p.metadata.name
@@ -34,7 +37,6 @@ def scheduler(settings):
     async def run_schedule(sch):
         orm_user = orm.User.find_by_id(db, sch.user_id)
         user = User(orm_user, settings, db)
-        logger.info(user)
         spawner = user.get_spawner(replace_failed=True)
         user_pod_name = await get_pod_name_from_ip(spawner)
         if not user_pod_name:
@@ -50,10 +52,10 @@ def scheduler(settings):
         v1_ws = client.CoreV1Api(api_client=WsApiClient())
         commands = ["/bin/sh",
                     "-c",
-                    f"nohup {sch.command}"]
-        await v1_ws.connect_get_namespaced_pod_exec(user_pod_name, "nb-server", command=commands, stderr=True, stdin=False,
-                                                stdout=True, tty=False, container="notebook")
-        sch.next_execution_time = get_next_execution_time(sch.schedule)
+                    f"nohup {sch.command} &",
+                    "exit"]
+        await v1_ws.connect_get_namespaced_pod_exec(user_pod_name, POD_NAMESPACE, command=commands, stderr=True, stdin=False,
+                                                                    stdout=True, tty=False, container="notebook")
     
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -68,7 +70,8 @@ def scheduler(settings):
                 for sch in schedules:
                     # run schedules
                     tasks.append(loop.create_task(run_schedule(copy.deepcopy(sch))))
-                loop.run_until_complete(asyncio.wait(tasks))
+                    sch.next_execution_time = get_next_execution_time(sch.schedule)
+                loop.run_until_complete(asyncio.wait(tasks, timeout=30.0))
                 db.commit()
         except Exception as e:
             logger.error(e)

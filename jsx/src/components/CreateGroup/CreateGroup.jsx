@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
 const CreateGroup = (props) => {
+  const apis = props.apis
   var [groupName, setGroupName] = useState(""),
     [errorAlert, setErrorAlert] = useState(null),
     limit = useSelector((state) => state.limit);
@@ -20,7 +21,7 @@ const CreateGroup = (props) => {
     });
   };
 
-  var { createGroup, updateGroups, history } = props;
+  var { createGroup, updateGroups, history } = apis;
 
   return (
     <>
@@ -103,15 +104,6 @@ const CreateGroup = (props) => {
       </div>
     </>
   );
-};
-
-CreateGroup.propTypes = {
-  createGroup: PropTypes.func,
-  updateGroups: PropTypes.func,
-  failRegexEvent: PropTypes.func,
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
 };
 
 export default CreateGroup;

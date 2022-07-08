@@ -1629,7 +1629,7 @@ class UserUrlHandler(BaseHandler):
             # but that's now the only normal way to get here.
             target = url_concat(target, {'redirects': 1})
 
-        self.redirect(target)
+        self.redirect("" + target)
         self.statsd.incr('redirects.user_after_login')
 
 

@@ -158,7 +158,9 @@ def _alembic(args):
     hub.load_config_file(hub.config_file)
     db_url = hub.db_url
     with _temp_alembic_ini(db_url) as alembic_ini:
-        check_call(['alembic', '-c', alembic_ini] + args)
+        test = ['alembic', '-c', alembic_ini]
+        test.extend(args)
+        check_call(test)
 
 
 def main(args=None):
