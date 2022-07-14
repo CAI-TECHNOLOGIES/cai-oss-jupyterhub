@@ -1,0 +1,22 @@
+### AINotebook Server libraries ###
+
+## Spawners
+jupyterhub-kubespawner==4.0.*
+kubernetes==23.3.*
+
+## Other dependencies
+pymysql>=1.0.2
+statsd==3.3.*
+cryptography>=36.0.2
+
+## OAuth
+PyJWT>=1.5.3
+#oauthenticator==14.2.*
+
+jupyterlab==3.3 
+werkzeug==2.1 
+SQLAlchemy==1.4 
+mysqlclient==2.1
+
+# idle-culler
+jupyterhub-idle-culler==1.2.1

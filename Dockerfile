@@ -98,4 +98,41 @@ EXPOSE 8000
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 LABEL org.jupyter.service="jupyterhub"
 
-CMD ["jupyterhub"]
+ARG CAI_USER="cai"
+
+RUN apt-get update && \
+    useradd -ms /bin/bash -d /srv/jupyterhub ${CAI_USER} && \
+    apt-get install -y --no-install-recommends \
+     build-essential \
+     default-libmysqlclient-dev \
+     git \
+     vim \
+     less \
+     python-dev \
+     python3-dev \
+     python3-setuptools \
+     python3-wheel \
+     libcurl4-openssl-dev \
+     libldap2-dev \
+     libsasl2-dev \
+     libssl-dev\
+     dnsutils \
+     && \
+    rm -rf /var/lib/apt/lists/* && \
+    chown -R ${CAI_USER}:${CAI_USER} /srv/jupyterhub
+
+COPY --chown=${CAI_USER}:${CAI_USER} cai-custom-files/requirements.txt cai-custom-files/oauthenticator-14.2.0-py3-none-any.whl /tmp/
+RUN PYCURL_SSL_LIBRARY=openssl pip3 install --no-cache-dir -r /tmp/requirements.txt
+RUN pip3 install /tmp/oauthenticator-14.2.0-py3-none-any.whl
+
+COPY --chown=${CAI_USER}:${CAI_USER} cai-custom-files/ldap.conf /home/jovyan/.configs/ldap.conf
+COPY --chown=${CAI_USER}:${CAI_USER} cai-custom-files/utils /srv/jupyterhub/utils
+
+### Copy the main configuration file
+COPY --chown=${CAI_USER}:${CAI_USER} cai-custom-files/jupyterhub_config.py /srv/jupyterhub/jupyterhub_config.py
+### Copy the logo inside the container
+COPY --chown=${CAI_USER}:${CAI_USER} cai-custom-files/coutureai.png /srv/jupyterhub/coutureai.png
+
+USER ${CAI_USER}
+
+CMD ["jupyterhub", "--port=8888", "--log-level=0", "--debug", "--config", "/srv/jupyterhub/jupyterhub_config.py"]
