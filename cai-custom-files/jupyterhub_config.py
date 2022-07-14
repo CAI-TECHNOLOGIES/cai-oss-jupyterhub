@@ -24,7 +24,7 @@ from urllib.parse import urlparse
 from oauthenticator.azuread import AzureAdOAuthenticator
 
 DATABASE_DIALECT = "mysql"
-MYSQL_DB = os.environ.get("MYSQL_DATABASE", "couture")
+MYSQL_DB = os.environ.get("MYSQL_DATABASE", "caihub")
 USER_TABLE = os.environ.get("USER_TABLE", "ab_user")
 NOTEBOOK_DIR = os.environ.get("DOCKER_NOTEBOOK_DIR", "/home/jovyan/work")
 CONFIGS_DIR = os.environ.get("HADOOP_CONFIGS_DIR", "/home/jovyan/.configs/hadoop_config_groups/")
@@ -37,6 +37,7 @@ CODE_ARTIFACT_VOLUME_PATH = os.environ.get("CODE_ARTIFACT_VOLUME_PATH", "/opt/co
 MLFLOW_TRACKING_URI = os.getenv("MLFLOW_TRACKING_URI",'http://couture-mlflow:5000')
 MLFLOW_S3_ENDPOINT_URL = os.getenv("MLFLOW_S3_ENDPOINT_URL", "http://couture-minio:9000")
 MODEL_SERVERS_VOLUME_PATH = os.environ.get("MODEL_SERVERS_VOLUME_PATH", "/home/jovyan/model-servers")
+MYSQL_SERVICE_NAMESPACE = os.environ.get("MYSQL_SERVICE_NAMESPACE","dev") + ".svc"
 # check if AUTH_TYPE is AUTH_LDAP or AUTH_DB and set `self.find_user`
 # to appropriate method.
 
@@ -74,7 +75,7 @@ AWS_SECRET_ACCESS_KEY = secrets["aws_secret_access_key"]
 
 MYSQL_USER = secrets["mysql_user"]
 MYSQL_PASSWORD = secrets["mysql_password"]
-MYSQL_HOST = secrets["mysql_host"]
+MYSQL_HOST = f"{secrets['mysql_host']}.{MYSQL_SERVICE_NAMESPACE}"
 MYSQL_PORT = secrets["mysql_port"]
 CONFIGPROXY_AUTH_TOKEN = secrets["configproxy_auth_token"]
 
@@ -590,7 +591,7 @@ c.JupyterHub.load_roles = filter_roles
 #c.JupyterHub.db_kwargs = {}
 
 # url for the database. e.g. `sqlite:///jupyterhub.sqlite`
-#c.JupyterHub.db_url = 'sqlite:///jupyterhub.sqlite'
+c.JupyterHub.db_url = SQLALCHEMY_DATABASE_URI
 
 # log all database transactions. This has A LOT of output
 #c.JupyterHub.debug_db = False
