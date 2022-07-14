@@ -5,7 +5,8 @@ import PropTypes from "prop-types";
 import "./pagination-footer.css";
 
 const PaginationFooter = (props) => {
-  let { endpoint, page, limit, numOffset, numElements } = props;
+  apis = props.apis
+  let { endpoint, page, limit, numOffset, numElements } = apis;
   return (
     <div className="pagination-footer">
       <p>
@@ -37,14 +38,6 @@ const PaginationFooter = (props) => {
       </p>
     </div>
   );
-};
-
-PaginationFooter.propTypes = {
-  endpoint: PropTypes.string,
-  page: PropTypes.number,
-  limit: PropTypes.number,
-  numOffset: PropTypes.number,
-  numElements: PropTypes.number,
 };
 
 export default PaginationFooter;

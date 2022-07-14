@@ -131,7 +131,7 @@ class LoginHandler(BaseHandler):
                         # auto_login failed, just 403
                         raise web.HTTPError(403)
                     else:
-                        self.redirect(self.get_next_url(user))
+                        self.redirect("" + self.get_next_url(user))
                 else:
                     if self.get_argument('next', default=False):
                         auto_login_url = url_concat(
@@ -140,7 +140,7 @@ class LoginHandler(BaseHandler):
                     self.redirect(auto_login_url)
                 return
             username = self.get_argument('username', default='')
-            self.finish(await self._render(username=username))
+            self.redirect(url_concat(self.authenticator.login_url(self.hub.base_url),{'next': self.get_argument('next', '')}))
 
     async def post(self):
         # parse the arguments dict
@@ -155,10 +155,7 @@ class LoginHandler(BaseHandler):
         if user:
             # register current user for subsequent requests to user (e.g. logging the request)
             self._jupyterhub_user = user
-            url = self.get_next_url(user)
-            allow_list = [self.get_next_url(user)]
-            if url in allow_list:
-                self.redirect(url)                
+            self.redirect("" + self.get_next_url(user))                
         else:
             html = await self._render(
                 login_error='Invalid username or password', username=data['username']

@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-const AddUser = (props) => {
+const AddUser = (apis) => {
+  const apis = props.apis
   var [users, setUsers] = useState([]),
     [admin, setAdmin] = useState(false),
     [errorAlert, setErrorAlert] = useState(null),
@@ -21,7 +22,7 @@ const AddUser = (props) => {
     });
   };
 
-  var { addUsers, failRegexEvent, updateUsers, history } = props;
+  var { addUsers, failRegexEvent, updateUsers, history } = apis;
 
   return (
     <>
@@ -125,15 +126,6 @@ const AddUser = (props) => {
       </div>
     </>
   );
-};
-
-AddUser.propTypes = {
-  addUsers: PropTypes.func,
-  failRegexEvent: PropTypes.func,
-  updateUsers: PropTypes.func,
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
 };
 
 export default AddUser;

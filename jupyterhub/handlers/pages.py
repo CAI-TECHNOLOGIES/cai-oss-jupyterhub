@@ -148,7 +148,7 @@ class SpawnHandler(BaseHandler):
         if not self.allow_named_servers and user.running:
             url = self.get_next_url(user, default=user.server_url(""))
             self.log.info("User is running: %s", user.name)
-            self.redirect(url)
+            self.redirect("" + url)
             return
 
         spawner = user.get_spawner(server_name, replace_failed=True)
@@ -159,12 +159,12 @@ class SpawnHandler(BaseHandler):
         if spawner.ready:
             self.log.info("Server %s is already running", spawner._log_name)
             next_url = self.get_next_url(user, default=user.server_url(server_name))
-            self.redirect(next_url)
+            self.redirect("" + next_url)
             return
 
         elif spawner.active:
             self.log.info("Server %s is already active", spawner._log_name)
-            self.redirect(pending_url)
+            self.redirect("" + pending_url)
             return
 
         # Add handler to spawner here so you can access query params in form rendering.
@@ -322,7 +322,7 @@ class SpawnHandler(BaseHandler):
                 500,
                 f"Unhandled error starting server {spawner._log_name}",
             )
-        return self.redirect(pending_url)
+        return self.redirect("" + pending_url)
 
 
 class SpawnPendingHandler(BaseHandler):
@@ -360,7 +360,7 @@ class SpawnPendingHandler(BaseHandler):
         if spawner.ready:
             # spawner is ready and waiting. Redirect to it.
             next_url = self.get_next_url(default=user.server_url(server_name))
-            self.redirect(next_url)
+            self.redirect("" + next_url)
             return
 
         # if spawning fails for any reason, point users to /hub/home to retry
@@ -447,7 +447,7 @@ class SpawnPendingHandler(BaseHandler):
         # redirect to the running server.
 
         next_url = self.get_next_url(default=user.server_url(server_name))
-        self.redirect(next_url)
+        self.redirect("" + next_url)
 
 
 class AdminHandler(BaseHandler):

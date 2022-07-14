@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { createStore } from "redux";
-import { compose } from "recompose";
 import { initialState, reducers } from "./Store";
 import { jhapiRequest } from "./util/jhapiUtil";
 import withAPI from "./util/withAPI";
@@ -45,28 +44,28 @@ const App = () => {
             <Route
               exact
               path="/"
-              component={compose(withAPI)(ServerDashboard)}
+              component={<ServerDashboard apis={withAPI} />}
             />
             <Route exact path="/groups" component={compose(withAPI)(Groups)} />
             <Route
               exact
               path="/group-edit"
-              component={compose(withAPI)(GroupEdit)}
+              component={<GroupEdit apis={withAPI} />}
             />
             <Route
               exact
               path="/create-group"
-              component={compose(withAPI)(CreateGroup)}
+              component={<CreateGroup apis={withAPI} />}
             />
             <Route
               exact
               path="/add-users"
-              component={compose(withAPI)(AddUser)}
+              component={<AddUser apis={withAPI} />}
             />
             <Route
               exact
               path="/edit-user"
-              component={compose(withAPI)(EditUser)}
+              component={<EditUser apis={withAPI} />}
             />
           </Switch>
         </HashRouter>

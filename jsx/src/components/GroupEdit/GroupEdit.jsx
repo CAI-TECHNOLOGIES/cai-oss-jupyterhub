@@ -5,6 +5,7 @@ import PropTypes from "prop-types";
 import GroupSelect from "../GroupSelect/GroupSelect";
 
 const GroupEdit = (props) => {
+  const apis = props.apis
   var [selected, setSelected] = useState([]),
     [changed, setChanged] = useState(false),
     [errorAlert, setErrorAlert] = useState(null),
@@ -30,7 +31,7 @@ const GroupEdit = (props) => {
     validateUser,
     history,
     location,
-  } = props;
+  } = apis;
 
   if (!location.state) {
     history.push("/groups");
@@ -156,23 +157,6 @@ const GroupEdit = (props) => {
       </div>
     </div>
   );
-};
-
-GroupEdit.propTypes = {
-  location: PropTypes.shape({
-    state: PropTypes.shape({
-      group_data: PropTypes.object,
-      callback: PropTypes.func,
-    }),
-  }),
-  history: PropTypes.shape({
-    push: PropTypes.func,
-  }),
-  addToGroup: PropTypes.func,
-  removeFromGroup: PropTypes.func,
-  deleteGroup: PropTypes.func,
-  updateGroups: PropTypes.func,
-  validateUser: PropTypes.func,
 };
 
 export default GroupEdit;
