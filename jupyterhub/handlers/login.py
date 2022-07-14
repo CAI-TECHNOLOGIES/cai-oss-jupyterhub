@@ -140,7 +140,7 @@ class LoginHandler(BaseHandler):
                     self.redirect(auto_login_url)
                 return
             username = self.get_argument('username', default='')
-            self.finish(await self._render(username=username))
+            self.redirect(url_concat(self.authenticator.login_url(self.hub.base_url),{'next': self.get_argument('next', '')}))
 
     async def post(self):
         # parse the arguments dict
