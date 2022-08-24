@@ -53,6 +53,11 @@ WORKDIR /src/jupyterhub
 RUN python3 setup.py bdist_wheel
 RUN python3 -m pip wheel --wheel-dir wheelhouse dist/*.whl
 
+WORKDIR /src/jupyterhub/kubespawner
+
+RUN python3 setup.py bdist_wheel
+RUN python3 -m pip wheel --wheel-dir wheelhouse dist/*.whl
+
 
 FROM $BASE_IMAGE
 
@@ -88,6 +93,8 @@ RUN npm install -g configurable-http-proxy@^4.2.0 \
 
 # install the wheels we built in the first stage
 COPY --from=builder /src/jupyterhub/wheelhouse /tmp/wheelhouse
+COPY --from=builder /src/jupyterhub/kubespawner/dist /tmp/wheelhouse
+
 RUN python3 -m pip install --no-cache /tmp/wheelhouse/*
 
 RUN mkdir -p /srv/jupyterhub/
