@@ -30,7 +30,7 @@ def scheduler(settings):
         pod_name = None
         pods = await spawner.api.list_namespaced_pod(POD_NAMESPACE)
         for p in pods.items:
-            if spawner.server.ip.startswith(p.metadata.name):
+            if spawner.server.ip.startswith(p.metadata.name + "." + POD_NAMESPACE):
                 pod_name = p.metadata.name
         return pod_name
                 
