@@ -742,11 +742,12 @@ class User:
 
             # Get user projects
             WORKBENCH_BASE_URL = os.environ.get("WORKBENCH_URL", "http://swb-dscw-core-cai-workbench.workbench-4.svc.cluster.local:8080/someuri")
-            projects = [{"name": p["name"], "id": str(p["id"])} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"]]
+            pvcs = [{"name": p["name"], "id": str(p["id"])} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"]]
 
-            self.log.debug(projects)
+            # Append snippets config dir
+            pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/my_workspace/.ai-notebook-settings/jupyterlab-code-snippets/"})
 
-            f = maybe_future(spawner.start(projects))
+            f = maybe_future(spawner.start(pvcs))
             # commit any changes in spawner.start (always commit db changes before yield)
             db.commit()
             url = await gen.with_timeout(timedelta(seconds=spawner.start_timeout), f)
