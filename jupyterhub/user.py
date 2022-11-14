@@ -1,5 +1,7 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
+import os
+import requests
 import json
 import warnings
 from collections import defaultdict
@@ -726,7 +728,26 @@ class User:
                 hub_paths = await maybe_future(spawner.create_certs())
                 spawner.cert_paths = await maybe_future(spawner.move_certs(hub_paths))
             self.log.debug("Calling Spawner.start for %s", spawner._log_name)
-            f = maybe_future(spawner.start())
+            
+            # Impersonate User
+            JWT_MANAGER_BASE_URL = os.environ.get("JWT_MANAGER_URL", "http://jwt-manager.isc-minerva-swb-dscw-jwt-manager.svc.cluster.local")
+            KEY_NAME = os.environ.get("JWT_MANAGER_KEY", "test2")
+            data_custom = {
+                "claims": {
+                    "uid": self.name,
+                },
+                "key": f"{KEY_NAME}"
+            }
+            req_jwt = requests.post(f"{JWT_MANAGER_BASE_URL}/api/jwt", json=data_custom).json()["data"]
+
+            # Get user projects
+            WORKBENCH_BASE_URL = os.environ.get("WORKBENCH_URL", "http://swb-dscw-core-cai-workbench.workbench-4.svc.cluster.local:8080/someuri")
+            pvcs = [{"name": p["name"], "id": str(p["id"])} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"]]
+
+            # Append snippets config dir
+            pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/my_workspace/.ai-notebook-settings/jupyterlab-code-snippets/"})
+
+            f = maybe_future(spawner.start(pvcs))
             # commit any changes in spawner.start (always commit db changes before yield)
             db.commit()
             url = await gen.with_timeout(timedelta(seconds=spawner.start_timeout), f)
