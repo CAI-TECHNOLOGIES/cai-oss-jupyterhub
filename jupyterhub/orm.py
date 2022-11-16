@@ -253,7 +253,7 @@ class Schedule(Base):
     id = Column(Unicode(255), primary_key=True, default=uuid_gen)
     last_run_time = Column(Float, default=time.time)
     next_execution_time = Column(Float)
-    user_id = Column(Unicode(255))
+    user_id = Column(Unicode(50))
     command = Column(Unicode(255))
     schedule = Column(Unicode(255))
 
@@ -306,7 +306,7 @@ class User(Base):
     """
 
     __tablename__ = 'users'
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Unicode(50), primary_key=True)
     name = Column(Unicode(255), unique=True)
 
     _orm_spawners = relationship(
@@ -369,7 +369,7 @@ class Spawner(Base):
     __tablename__ = 'spawners'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
+    user_id = Column(Unicode(50), ForeignKey('users.id', ondelete='CASCADE'))
 
     server_id = Column(Integer, ForeignKey('servers.id', ondelete='SET NULL'))
     server = relationship(
@@ -627,7 +627,7 @@ class APIToken(Hashed, Base):
     __tablename__ = 'api_tokens'
 
     user_id = Column(
-        Integer,
+        Unicode(50),
         ForeignKey('users.id', ondelete="CASCADE"),
         nullable=True,
     )
@@ -792,7 +792,7 @@ class OAuthCode(Expiring, Base):
     redirect_uri = Column(Unicode(1023))
     session_id = Column(Unicode(255))
     # state = Column(Unicode(1023))
-    user_id = Column(Integer, ForeignKey('users.id', ondelete='CASCADE'))
+    user_id = Column(Unicode(50), ForeignKey('users.id', ondelete='CASCADE'))
 
     roles = relationship('Role', secondary='oauth_code_role_map')
 

@@ -481,12 +481,15 @@ class BaseHandler(RequestHandler):
         orm_user = orm.User.find(db=self.db, name=name)
         return self._user_from_orm(orm_user)
 
-    def user_from_username(self, username):
+    def user_from_username(self, username, id=None):
         """Get User for username, creating if it doesn't exist"""
         user = self.find_user(username)
         if user is None:
             # not found, create and register user
-            u = orm.User(name=username)
+            if id == None:
+                u = orm.User(name=username)
+            else:
+                u = orm.User(name=username, id=id)
             self.db.add(u)
             roles.assign_default_roles(self.db, entity=u)
             TOTAL_USERS.inc()
