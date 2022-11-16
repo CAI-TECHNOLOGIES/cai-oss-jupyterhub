@@ -734,7 +734,7 @@ class User:
             KEY_NAME = os.environ.get("JWT_MANAGER_KEY", "test2")
             data_custom = {
                 "claims": {
-                    "uid": self.name,
+                    "uid": self.orm_user.id,
                 },
                 "key": f"{KEY_NAME}"
             }
@@ -742,10 +742,10 @@ class User:
 
             # Get user projects
             WORKBENCH_BASE_URL = os.environ.get("WORKBENCH_URL", "http://swb-dscw-core-cai-workbench.workbench-4.svc.cluster.local:8080/someuri")
-            pvcs = [{"name": p["name"], "id": str(p["id"])} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"]]
+            pvcs = [{"name": p["name"], "id": str(p["id"]), "storage_capacity":"200Mi"} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"]]
 
             # Append snippets config dir
-            pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/my_workspace/.ai-notebook-settings/jupyterlab-code-snippets/"})
+            pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/.user-data/.ai-notebook-settings/jupyterlab-code-snippets/"})
 
             f = maybe_future(spawner.start(pvcs))
             # commit any changes in spawner.start (always commit db changes before yield)
