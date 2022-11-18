@@ -749,7 +749,13 @@ class User:
             pvcs = [{"name": p["name"], "id": str(p["id"]), "storage_capacity":"200Mi"} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"] if str(p["id"]) == project_id or p["name"].lower().endswith(f"_{username}")]
 
             # Append snippets config dir
-            pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/.user-data/.ai-notebook-settings/jupyterlab-code-snippets/"})
+            pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/.user-data/.ai-notebook-settings/jupyterlab-code-snippets/", "storage_capacity": "20Mi"})
+            
+            for pvc in pvcs:
+                if "_mpg_" in pvc["name"]:
+                    username = pvc["name"].split("_mpg_")[-1].split("-")[-1]
+                    pvc["id"] = "everyones-playground"
+                    pvc["subpath"] = f"user-{username}"
 
             f = maybe_future(spawner.start(pvcs, project_id))
             # commit any changes in spawner.start (always commit db changes before yield)
