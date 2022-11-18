@@ -655,13 +655,15 @@ class User:
         spawner.handler = handler
 
         # Passing user_options to the spawner
-        if options is None:
+        if options is None and options.get("project_id", None) is None:
             # options unspecified, load from db which should have the previous value
-            options = spawner.orm_spawner.user_options or {}
+            # options = spawner.orm_spawner.user_options or {}
+            raise ValueError("Missing project_id")
         else:
             # options specified, save for use as future defaults
             spawner.orm_spawner.user_options = options
             db.commit()
+            project_id = options["project_id"]
 
         spawner.user_options = options
         # we are starting a new server, make sure it doesn't restore state
@@ -740,14 +742,16 @@ class User:
             }
             req_jwt = requests.post(f"{JWT_MANAGER_BASE_URL}/api/jwt", json=data_custom).json()["data"]
 
+            username = self.orm_user.name[5:]
+
             # Get user projects
             WORKBENCH_BASE_URL = os.environ.get("WORKBENCH_URL", "http://swb-dscw-core-cai-workbench.workbench-4.svc.cluster.local:8080/someuri")
-            pvcs = [{"name": p["name"], "id": str(p["id"]), "storage_capacity":"200Mi"} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"]]
+            pvcs = [{"name": p["name"], "id": str(p["id"]), "storage_capacity":"200Mi"} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"] if str(p["id"]) == project_id or p["name"].lower().endswith(f"_{username}")]
 
             # Append snippets config dir
             pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/.user-data/.ai-notebook-settings/jupyterlab-code-snippets/"})
 
-            f = maybe_future(spawner.start(pvcs))
+            f = maybe_future(spawner.start(pvcs, project_id))
             # commit any changes in spawner.start (always commit db changes before yield)
             db.commit()
             url = await gen.with_timeout(timedelta(seconds=spawner.start_timeout), f)
