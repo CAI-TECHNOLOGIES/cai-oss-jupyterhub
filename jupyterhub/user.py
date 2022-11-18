@@ -755,7 +755,7 @@ class User:
                 if "_mpg_" in pvc["name"]:
                     username = pvc["name"].split("_mpg_")[-1].split("-")[-1]
                     pvc["id"] = "everyones-playground"
-                    pvc["subpath"] = f"user-{username}"
+                    pvc["sub_path"] = f"data/user-{username}"
 
             f = maybe_future(spawner.start(pvcs, project_id))
             # commit any changes in spawner.start (always commit db changes before yield)
