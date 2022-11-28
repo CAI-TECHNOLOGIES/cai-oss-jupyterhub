@@ -32,7 +32,7 @@ from .utils import AnyTimeoutError
 from .utils import make_ssl_context
 from .utils import maybe_future
 from .utils import url_path_join
-
+from .vault import get_vault_secrets
 
 # detailed messages about the most common failure-to-start errors,
 # which manifest timeouts during start
@@ -129,11 +129,13 @@ class UserDict(dict):
         if isinstance(key, User):
             key = key.id
         elif isinstance(key, str):
-            orm_user = self.db.query(orm.User).filter(orm.User.name == key).first()
+            orm_user = self.db.query(orm.User).filter(orm.User.id == key).first()
             if orm_user is None:
-                raise KeyError("No such user: %s" % key)
-            else:
-                key = orm_user.id
+                orm_user = self.db.query(orm.User).filter(orm.User.name == key).first()
+                if orm_user is None:
+                    raise KeyError("No such user: %s" % key)
+                else:
+                    key = orm_user.id
         if isinstance(key, orm.User):
             # users[orm_user] returns User(orm_user)
             orm_user = key
@@ -143,7 +145,7 @@ class UserDict(dict):
             user = super().__getitem__(orm_user.id)
             user.db = self.db
             return user
-        elif isinstance(key, int):
+        elif isinstance(key, str):
             id = key
             if id not in self:
                 orm_user = self.db.query(orm.User).filter(orm.User.id == id).first()
@@ -749,15 +751,30 @@ class User:
             pvcs = [{"name": p["name"], "id": str(p["id"]), "storage_capacity":"200Mi"} for p in requests.get(f"{WORKBENCH_BASE_URL}/api/experimental/project", headers={"Authorization": f"Bearer {req_jwt}"}).json()["data"] if str(p["id"]) == project_id or p["name"].lower().endswith(f"_{username}")]
 
             # Append snippets config dir
-            pvcs.append({"name": "common-code-snippets", "id": "cai-ai-code-snippets", "mount_path": "/home/cai/.user-data/.ai-notebook-settings/jupyterlab-code-snippets/", "storage_capacity": "20Mi"})
+            pvcs.append({"name": "common-code-snippets", "id": "everyones-playground", "mount_path": "/home/cai/.user-data/.ai-notebook-settings/jupyterlab-code-snippets/", "sub_path": "code-snippets"})
             
             for pvc in pvcs:
                 if "_mpg_" in pvc["name"]:
-                    username = pvc["name"].split("_mpg_")[-1].split("-")[-1]
+                    username = pvc["name"].split("_mpg_")[-1]
                     pvc["id"] = "everyones-playground"
                     pvc["sub_path"] = f"data/user-{username}"
 
-            f = maybe_future(spawner.start(pvcs, project_id))
+            conf = get_vault_secrets(
+                vault_address=os.environ.get("VAULT_ADDR", "http://vault.vault.svc:8200"),
+                vault_secret_path=f"{project_id}/notebook_configuration",
+                vault_mount="isc-minerva-swb-dscw-core-config-groups",
+            )
+            
+            
+            project_configs = {
+                "id":project_id,
+                "cpu_guarantee": float(conf["CPU_GUARANTEE"]),
+                "cpu_limit": float(conf["CPU_LIMIT"]),
+                "mem_guarantee": conf["MEM_GUARANTEE"],
+                "mem_limit": conf["MEM_LIMIT"],
+            }
+
+            f = maybe_future(spawner.start(pvcs, project_configs))
             # commit any changes in spawner.start (always commit db changes before yield)
             db.commit()
             url = await gen.with_timeout(timedelta(seconds=spawner.start_timeout), f)
