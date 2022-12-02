@@ -657,7 +657,7 @@ class User:
         spawner.handler = handler
 
         # Passing user_options to the spawner
-        if options is None and options.get("project_id", None) is None:
+        if options is None or options.get("project_id", None) is None:
             # options unspecified, load from db which should have the previous value
             # options = spawner.orm_spawner.user_options or {}
             raise ValueError("Missing project_id")
