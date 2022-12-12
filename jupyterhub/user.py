@@ -657,15 +657,22 @@ class User:
         spawner.handler = handler
 
         project_id = None
+        req_jwt = None
 
         # Passing user_options to the spawner
         if options is None:
             options = spawner.orm_spawner.user_options or {}
-        elif options.get("project_id", None) is not None:
-            # options specified, save for use as future defaults
+        else:
+            if options.get("project_id", None) is not None:
+                # options specified, save for use as future defaults
+                project_id = options["project_id"]
+            
+            if options.get("user_jwt", None) is not None:
+                # options specified, save for use as future defaults
+                req_jwt = options["user_jwt"]
+            
             spawner.orm_spawner.user_options = options
             db.commit()
-            project_id = options["project_id"]
 
         spawner.user_options = options
         # we are starting a new server, make sure it doesn't restore state
@@ -733,16 +740,18 @@ class User:
                 spawner.cert_paths = await maybe_future(spawner.move_certs(hub_paths))
             self.log.debug("Calling Spawner.start for %s", spawner._log_name)
             
-            # Impersonate User
-            JWT_MANAGER_BASE_URL = os.environ.get("JWT_MANAGER_URL", "http://jwt-manager.isc-minerva-swb-dscw-jwt-manager.svc.cluster.local")
-            KEY_NAME = os.environ.get("JWT_MANAGER_KEY", "test2")
-            data_custom = {
-                "claims": {
-                    "uid": self.orm_user.id,
-                },
-                "key": f"{KEY_NAME}"
-            }
-            req_jwt = requests.post(f"{JWT_MANAGER_BASE_URL}/api/jwt", json=data_custom).json()["data"]
+            if req_jwt is None:
+                # Impersonate User
+                JWT_MANAGER_BASE_URL = os.environ.get("JWT_MANAGER_URL", "http://jwt-manager.isc-minerva-swb-dscw-jwt-manager.svc.cluster.local")
+                KEY_NAME = os.environ.get("JWT_MANAGER_KEY", "test2")
+                data_custom = {
+                    "claims": {
+                        "uid": self.orm_user.id,
+                        "roles": []
+                    },
+                    "key": f"{KEY_NAME}"
+                }
+                req_jwt = requests.post(f"{JWT_MANAGER_BASE_URL}/api/jwt", json=data_custom).json()["data"]
 
             username = self.orm_user.name[5:]
 
@@ -771,6 +780,7 @@ class User:
             additional_envs = {
                 "CAI_PROJECT_ID": project_id,
                 "CAI_USER_ID": self.orm_user.id,
+                "CAI_USER_TOKEN": req_jwt,
                 "CAI_BASE_URL": os.environ.get("CAI_BASE_URL", "https://exl.workbench.couture.ai/"),
                 "CAIML_WEB_HOST":os.environ.get("CAIML_WEB_HOST", "http://coutureml-caiml-webserver.coutureml.svc.cluster.local"),
                 "CAIML_API_HOST":os.environ.get("CAIML_API_HOST", "http://coutureml-caiml-apiserver.coutureml.svc.cluster.local"),
