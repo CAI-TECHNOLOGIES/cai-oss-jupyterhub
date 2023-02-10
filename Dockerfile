@@ -22,7 +22,7 @@
 # from your docker directory.
 
 ARG BASE_IMAGE=ubuntu:20.04
-FROM $BASE_IMAGE AS builder
+FROM $BASE_IMAGE
 
 USER root
 
@@ -52,52 +52,3 @@ WORKDIR /src/jupyterhub
 # packaged with the built wheel.)
 RUN python3 setup.py bdist_wheel
 RUN python3 -m pip wheel --wheel-dir wheelhouse dist/*.whl
-
-
-FROM $BASE_IMAGE
-
-USER root
-
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update \
- && apt-get install -yq --no-install-recommends \
-    ca-certificates \
-    curl \
-    gnupg \
-    locales \
-    python3-pip \
-    python3-pycurl \
-    nodejs \
-    npm \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
-ENV SHELL=/bin/bash \
-    LC_ALL=en_US.UTF-8 \
-    LANG=en_US.UTF-8 \
-    LANGUAGE=en_US.UTF-8
-
-RUN  locale-gen $LC_ALL
-
-# always make sure pip is up to date!
-RUN python3 -m pip install --no-cache --upgrade setuptools pip
-
-RUN npm install -g configurable-http-proxy@^4.2.0 \
- && rm -rf ~/.npm
-
-# install the wheels we built in the first stage
-COPY --from=builder /src/jupyterhub/wheelhouse /tmp/wheelhouse
-COPY libs/. /tmp/wheelhouse
-
-RUN python3 -m pip install --no-cache /tmp/wheelhouse/*
-
-RUN mkdir -p /srv/jupyterhub/
-WORKDIR /srv/jupyterhub/
-
-EXPOSE 8000
-
-LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
-LABEL org.jupyter.service="jupyterhub"
-
-CMD ["jupyterhub"]
