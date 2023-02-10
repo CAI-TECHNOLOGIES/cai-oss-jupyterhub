@@ -784,7 +784,8 @@ class User:
                 "CAI_BASE_URL": os.environ.get("CAI_BASE_URL", "https://exl.workbench.couture.ai/"),
                 "CAIML_WEB_HOST":os.environ.get("CAIML_WEB_HOST", "http://coutureml-caiml-webserver.coutureml.svc.cluster.local"),
                 "CAIML_API_HOST":os.environ.get("CAIML_API_HOST", "http://coutureml-caiml-apiserver.coutureml.svc.cluster.local"),
-                "CAIML_FILES_HOST":os.environ.get("CAIML_FILES_HOST", "http://coutureml-caiml-fileserver.coutureml.svc.cluster.local")
+                "CAIML_FILES_HOST":os.environ.get("CAIML_FILES_HOST", "http://coutureml-caiml-fileserver.coutureml.svc.cluster.local"),
+                "CAI_WORKBENCH_URL":WORKBENCH_BASE_URL
             }
             
             project_configs = {
